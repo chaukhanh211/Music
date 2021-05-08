@@ -3,6 +3,8 @@
     2.Scroll Top
     3.Play / Pause / Seek
     4.CD rotate
+    5.Next / Prev
+    6.Random
 */
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
@@ -14,6 +16,9 @@ const cdThumb = $('.cd-thumb')
 const audio = $('#audio')
 const playBtn = $('.btn-toggle-play')
 const progress = $('#progress')
+const btnNext = $('.btn-next')
+const btnPrev = $('.btn-prev')
+const btnRandom = $('.btn-random')
 
 const app = {
 
@@ -101,6 +106,7 @@ const app = {
     handleEvents: function() {
       const cdWidth  = cd.offsetWidth
       const _this = this
+      //const isRandom = false
 
       //Xử lý CD quay / dừng
       const cdThumbAnimate =  cdThumb.animate([
@@ -154,6 +160,37 @@ const app = {
             audio.currentTime = seekTime
         }
 
+        // Khi next bài hát
+        btnNext.onclick = function() {
+          if(_this.isRandom) {
+            _this.ranDomSong();
+          } else {
+            _this.nextSong();
+          }
+          audio.play()
+        }
+
+         // Khi prev bài hát
+         btnPrev.onclick = function() {
+          if(_this.isRandom) {
+            _this.ranDomSong();
+          } else {
+            _this.prevSong();
+          }
+          audio.play()
+        }
+
+        //Bật tắt random
+        btnRandom.onclick = function() {
+            _this.isRandom = !_this.isRandom
+            btnRandom.classList.toggle('active',  _this.isRandom)
+        }
+
+        //Xử lý next khi audio ended
+        audio.onended = function() {
+          btnNext.click()
+        }
+        
       }
     },
 
@@ -162,6 +199,35 @@ const app = {
         cdThumb.style.backgroundImage = `url('${this.currentSong.image}')`
         audio.src = this.currentSong.path
     },
+
+    nextSong: function() {
+      this.currentIndex++
+      if(this.currentIndex >= this.songs.length){
+        this.currentIndex = 0
+      }
+      this.loadCurrentSong()
+    },
+
+    prevSong: function () {
+      this.currentIndex--
+      if(this.currentIndex < 0){
+        this.currentIndex = this.songs.length - 1
+      }
+      this.loadCurrentSong()
+    },
+
+    ranDomSong: function() {
+      let newIndex
+      do {
+            newIndex = Math.floor(Math.random() * this.songs.length)
+      } while(newIndex === this.currentIndex)
+      console.log(newIndex)
+      this.currentIndex = newIndex
+      this.loadCurrentSong()
+    },
+
+  
+
     start: function() {
         //Định nghĩa các thuộc tính cho object
         this.defineProperties()
